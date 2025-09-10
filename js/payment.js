@@ -228,9 +228,10 @@ const PaymentGatewaySDK = {
         return new Promise((resolve, reject) => {
             console.log(`Processing ${method} payment:`, paymentDetails);
             
-            if (method === 'rayswap') {
-                return this.processRaySwapPayment(paymentDetails).then(resolve).catch(reject);
-            }
+            try {
+                if (method === 'rayswap') {
+                    return this.processRaySwapPayment(paymentDetails).then(resolve).catch(reject);
+                }
             
             // Simulate payment processing based on method
             const processingTime = this.getProcessingTime(method);
@@ -265,6 +266,16 @@ const PaymentGatewaySDK = {
                     reject(error);
                 }
             }, processingTime);
+            } catch (error) {
+                console.error('Unexpected error in processPayment:', error);
+                reject({
+                    success: false,
+                    error: 'unexpected_error',
+                    message: 'An unexpected error occurred during payment processing',
+                    code: 'E005',
+                    originalError: error.message
+                });
+            }
         });
     },
 
@@ -759,6 +770,11 @@ const PaymentFormHandler = {
     processPayment: function(method, paymentData) {
         const proceedBtn = document.getElementById('proceedPaymentBtn');
         
+        // Clear any previous errors
+        if (typeof PaymentGatewayDemo !== 'undefined' && PaymentGatewayDemo.ErrorHandler) {
+            PaymentGatewayDemo.ErrorHandler.clearErrors();
+        }
+        
         // Show loading state
         PaymentGatewayDemo.Utils.showButtonLoading(proceedBtn, 'Processing Payment...');
         
@@ -794,12 +810,81 @@ const PaymentFormHandler = {
                 // Hide loading state
                 PaymentGatewayDemo.Utils.hideButtonLoading(proceedBtn);
                 
-                // Show error message
-                alert(error.message || 'Payment failed. Please try again.');
+                // Show detailed error message
+                const errorMessage = this.getDetailedErrorMessage(error);
+                
+                // Clear any previous errors
+                if (typeof PaymentGatewayDemo !== 'undefined' && PaymentGatewayDemo.ErrorHandler) {
+                    PaymentGatewayDemo.ErrorHandler.clearErrors();
+                    PaymentGatewayDemo.ErrorHandler.showUserError(errorMessage);
+                } else {
+                    alert(errorMessage);
+                }
                 
                 // Track failure
                 PaymentGatewayDemo.Analytics.trackEvent('fail', 'payment', method);
             });
+    },
+
+    /**
+     * Get detailed error message for better user experience
+     * @param {Object} error - Error object
+     * @returns {string} User-friendly error message
+     */
+    getDetailedErrorMessage: function(error) {
+        console.log('Processing error:', error);
+        
+        // Handle different error types
+        if (!error) {
+            return 'An unknown error occurred. Please try again.';
+        }
+        
+        // Check for specific error codes
+        if (error.code) {
+            switch (error.code) {
+                case 'E001':
+                    return 'Payment processing failed. Please check your payment details and try again.';
+                case 'E002':
+                    return 'RaySwap payment service is currently unavailable. Please try a different payment method.';
+                case 'E003':
+                    return 'Payment was cancelled. You can try again when ready.';
+                case 'E004':
+                    return 'Cryptocurrency payment failed. Please check your wallet and try again.';
+                case 'E005':
+                    return 'An unexpected error occurred during payment processing. Please try again or contact support.';
+                default:
+                    return error.message || 'Payment failed with error code: ' + error.code;
+            }
+        }
+        
+        // Check for specific error types
+        if (error.error) {
+            switch (error.error) {
+                case 'rayswap_unavailable':
+                    return 'RaySwap payment service is not available. Please try a different payment method.';
+                case 'payment_cancelled':
+                    return 'Payment was cancelled by user.';
+                case 'rayswap_error':
+                    return 'Cryptocurrency payment failed: ' + (error.message || 'Please try again.');
+                case 'payment_failed':
+                    return 'Payment could not be processed. Please verify your payment details and try again.';
+                default:
+                    return 'Payment failed: ' + (error.message || error.error);
+            }
+        }
+        
+        // Handle network errors
+        if (error.name === 'NetworkError' || error.message?.includes('network')) {
+            return 'Network connection error. Please check your internet connection and try again.';
+        }
+        
+        // Handle timeout errors
+        if (error.name === 'TimeoutError' || error.message?.includes('timeout')) {
+            return 'Payment request timed out. Please try again.';
+        }
+        
+        // Return the error message if available, otherwise a generic message
+        return error.message || 'An unexpected error occurred during payment processing. Please try again.';
     },
 
     /**

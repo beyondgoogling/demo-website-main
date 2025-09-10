@@ -208,10 +208,35 @@ const ErrorHandler = {
     /**
      * Show user-friendly error message
      * @param {string} message - Error message to display
+     * @param {string} type - Error type (error, warning, info)
      */
-    showUserError: function(message) {
-        // Simple alert for now - could be replaced with a modal or toast
-        alert('Error: ' + message);
+    showUserError: function(message, type = 'error') {
+        // Log the error for debugging
+        console.error('User Error:', message);
+        
+        // Try to show in a more user-friendly way if possible
+        const errorContainer = document.getElementById('error-container');
+        if (errorContainer) {
+            errorContainer.innerHTML = `
+                <div class="alert alert-${type}" style="margin: 10px 0; padding: 10px; border-radius: 4px; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;">
+                    <strong>${type === 'error' ? 'Error:' : 'Notice:'}</strong> ${message}
+                </div>
+            `;
+            errorContainer.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            // Fallback to alert
+            alert((type === 'error' ? 'Error: ' : 'Notice: ') + message);
+        }
+    },
+    
+    /**
+     * Clear any displayed error messages
+     */
+    clearErrors: function() {
+        const errorContainer = document.getElementById('error-container');
+        if (errorContainer) {
+            errorContainer.innerHTML = '';
+        }
     }
 };
 
@@ -304,6 +329,17 @@ document.addEventListener('DOMContentLoaded', function() {
 // Global error handler
 window.addEventListener('error', function(event) {
     ErrorHandler.log(event.error, 'Global Error Handler');
+});
+
+// Handle unhandled promise rejections
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('Unhandled promise rejection:', event.reason);
+    ErrorHandler.log(event.reason, 'Unhandled Promise Rejection');
+    
+    // Show user-friendly error for payment-related rejections
+    if (event.reason && (event.reason.error === 'payment_failed' || event.reason.message?.includes('payment'))) {
+        ErrorHandler.showUserError('Payment processing failed. Please try again.');
+    }
 });
 
 // Export utilities for use in other scripts
