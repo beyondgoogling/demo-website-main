@@ -113,7 +113,7 @@ const PaymentGatewaySDK = {
             console.log('✅ RaySwap SDK loaded successfully');
             
             // Check if SDK has required methods
-            const requiredMethods = ['init', 'createPayment', 'processPayment'];
+            const requiredMethods = ['init', 'openPayment'];
             const availableMethods = requiredMethods.filter(method => typeof window.RaySwap[method] === 'function');
             
             console.log('📦 Available SDK methods:', availableMethods);
