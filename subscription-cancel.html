@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Cancelled - RaySwap Shop</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav">
+                <div class="logo">
+                    <h2>RaySwap Shop</h2>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html" class="nav-link">Shop</a>
+                    <a href="subscription.html" class="nav-link">Subscriptions</a>
+                    <a href="cart.html" class="nav-link cart-link">
+                        Cart <span class="cart-counter">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="cancel-container">
+                <!-- Cancel Icon -->
+                <div class="cancel-icon">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" fill="#EF4444"/>
+                        <path d="M15 9l-6 6M9 9l6 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <!-- Cancel Message -->
+                <div class="cancel-content">
+                    <h1>Subscription Cancelled</h1>
+                    <p class="cancel-description">
+                        Your subscription setup has been cancelled. No charges have been made to your account.
+                    </p>
+
+                    <!-- Cancellation Details -->
+                    <div class="cancellation-details">
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Session ID:</span>
+                                <span class="detail-value" id="sessionId">N/A</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Status:</span>
+                                <span class="detail-value status-cancelled">Cancelled</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Cancelled:</span>
+                                <span class="detail-value" id="cancelledDate">Just now</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Why Subscribe Section -->
+                    <div class="why-subscribe">
+                        <h3>Why Choose Our Subscriptions?</h3>
+                        <div class="benefits-grid">
+                            <div class="benefit-item">
+                                <div class="benefit-icon">💰</div>
+                                <div class="benefit-content">
+                                    <strong>Save Money</strong>
+                                    <p>Get significant discounts compared to one-time purchases</p>
+                                </div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon">🔄</div>
+                                <div class="benefit-content">
+                                    <strong>Automatic Updates</strong>
+                                    <p>Always get the latest features and security updates</p>
+                                </div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon">🎯</div>
+                                <div class="benefit-content">
+                                    <strong>Priority Support</strong>
+                                    <p>Get faster response times and dedicated assistance</p>
+                                </div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon">⚡</div>
+                                <div class="benefit-content">
+                                    <strong>Flexible Billing</strong>
+                                    <p>Choose monthly, quarterly, or annual billing cycles</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feedback Section -->
+                    <div class="feedback-section">
+                        <h3>Help Us Improve</h3>
+                        <p>We'd love to know why you cancelled. Your feedback helps us improve our service.</p>
+                        
+                        <div class="feedback-options">
+                            <label class="feedback-option">
+                                <input type="radio" name="cancelReason" value="too-expensive">
+                                <span>Too expensive</span>
+                            </label>
+                            <label class="feedback-option">
+                                <input type="radio" name="cancelReason" value="not-needed">
+                                <span>Don't need it right now</span>
+                            </label>
+                            <label class="feedback-option">
+                                <input type="radio" name="cancelReason" value="technical-issues">
+                                <span>Technical issues during signup</span>
+                            </label>
+                            <label class="feedback-option">
+                                <input type="radio" name="cancelReason" value="changed-mind">
+                                <span>Changed my mind</span>
+                            </label>
+                            <label class="feedback-option">
+                                <input type="radio" name="cancelReason" value="other">
+                                <span>Other reason</span>
+                            </label>
+                        </div>
+
+                        <div class="feedback-text" style="display: none;">
+                            <textarea id="feedbackText" placeholder="Please tell us more about your reason for cancelling..."></textarea>
+                        </div>
+
+                        <button id="submitFeedback" class="btn btn-secondary">Submit Feedback</button>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <a href="subscription.html" class="btn btn-primary">Try Again</a>
+                        <a href="index.html" class="btn btn-secondary">Continue Shopping</a>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="contact-info">
+                        <h4>Still Have Questions?</h4>
+                        <p>
+                            Our team is here to help! Contact us at 
+                            <a href="mailto:support@rayswap.exchange">support@rayswap.exchange</a> 
+                            or visit our <a href="#">FAQ page</a> for more information.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Extract session ID from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session');
+            
+            if (sessionId) {
+                document.getElementById('sessionId').textContent = sessionId;
+            }
+
+            // Set current date
+            const now = new Date();
+            document.getElementById('cancelledDate').textContent = now.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+
+            // Handle feedback form
+            const feedbackOptions = document.querySelectorAll('input[name="cancelReason"]');
+            const feedbackText = document.querySelector('.feedback-text');
+            const submitFeedbackBtn = document.getElementById('submitFeedback');
+
+            feedbackOptions.forEach(option => {
+                option.addEventListener('change', function() {
+                    if (this.value === 'other') {
+                        feedbackText.style.display = 'block';
+                    } else {
+                        feedbackText.style.display = 'none';
+                    }
+                });
+            });
+
+            // Handle feedback submission
+            submitFeedbackBtn.addEventListener('click', function() {
+                const selectedReason = document.querySelector('input[name="cancelReason"]:checked');
+                
+                if (!selectedReason) {
+                    alert('Please select a reason for cancelling.');
+                    return;
+                }
+
+                const reason = selectedReason.value;
+                const additionalText = document.getElementById('feedbackText').value;
+
+                // In a real implementation, you would send this feedback to your server
+                console.log('Feedback submitted:', { reason, additionalText, sessionId });
+                
+                // Show thank you message
+                this.textContent = 'Thank you for your feedback!';
+                this.disabled = true;
+                this.classList.remove('btn-secondary');
+                this.classList.add('btn-success');
+
+                // Track cancellation event
+                if (typeof Analytics !== 'undefined') {
+                    Analytics.trackEvent('subscription_cancelled', 'subscription', reason);
+                }
+            });
+
+            // Track cancellation page view
+            if (typeof Analytics !== 'undefined') {
+                Analytics.trackPageView('subscription_cancel');
+            }
+        });
+    </script>
+</body>
+</html>

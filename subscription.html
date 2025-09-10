@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Plans - RaySwap Shop</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav">
+                <div class="logo">
+                    <h2>RaySwap Shop</h2>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html" class="nav-link">Shop</a>
+                    <a href="subscription.html" class="nav-link active">Subscriptions</a>
+                    <a href="cart.html" class="nav-link cart-link">
+                        Cart <span class="cart-counter">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Hero Section -->
+            <section class="hero">
+                <h1>Subscription Plans</h1>
+                <p>Choose the perfect subscription plan for your needs. All plans include secure payment processing and flexible billing options.</p>
+            </section>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading subscription plans...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="error-state" style="display: none;">
+                <div class="error-message">
+                    <h3>Unable to Load Plans</h3>
+                    <p id="errorMessage">There was an error loading subscription plans. Please try again later.</p>
+                    <button id="retryButton" class="btn btn-primary">Retry</button>
+                </div>
+            </div>
+
+            <!-- Subscription Plans Grid -->
+            <section id="plansSection" class="plans-section" style="display: none;">
+                <div class="plans-grid" id="plansGrid">
+                    <!-- Plans will be loaded here by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Checkout Modal -->
+            <div id="checkoutModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Subscribe to Plan</h3>
+                        <button class="modal-close" id="closeModal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="selectedPlanInfo" class="selected-plan-info">
+                            <!-- Selected plan info will be displayed here -->
+                        </div>
+                        
+                        <form id="subscriptionForm" class="subscription-form">
+                            <div class="form-group">
+                                <label for="customerEmail">Email Address *</label>
+                                <input type="email" id="customerEmail" name="customerEmail" required placeholder="Enter your email address">
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="firstName">First Name *</label>
+                                    <input type="text" id="firstName" name="firstName" required placeholder="First name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastName">Last Name *</label>
+                                    <input type="text" id="lastName" name="lastName" required placeholder="Last name">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="walletAddress">Wallet Address *</label>
+                                <input type="text" id="walletAddress" name="walletAddress" required placeholder="Enter your wallet address">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tokenId">Payment Token *</label>
+                                <select id="tokenId" name="tokenId" required>
+                                    <option value="">Select payment token...</option>
+                                    <!-- Token options will be loaded dynamically -->
+                                </select>
+                            </div>
+
+                            <div class="subscription-limits">
+                                <h4>Subscription Limits</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="capAmount">Cap Amount *</label>
+                                        <input type="number" id="capAmount" name="capAmount" required placeholder="Maximum total amount" step="0.01">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="maxPerCharge">Max Per Charge *</label>
+                                        <input type="number" id="maxPerCharge" name="maxPerCharge" required placeholder="Maximum per charge" step="0.01">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="subscription-schedule">
+                                <h4>Billing Schedule</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="periodSeconds">Billing Period (seconds) *</label>
+                                        <select id="periodSeconds" name="periodSeconds" required>
+                                            <option value="2592000">Monthly (30 days)</option>
+                                            <option value="7776000">Quarterly (90 days)</option>
+                                            <option value="31536000">Yearly (365 days)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nextDue">Next Due Date *</label>
+                                        <input type="datetime-local" id="nextDue" name="nextDue" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="expiry">Subscription Expiry *</label>
+                                    <input type="datetime-local" id="expiry" name="expiry" required>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" id="cancelSubscription" class="btn btn-secondary">Cancel</button>
+                                <button type="submit" id="submitSubscription" class="btn btn-primary">
+                                    <span class="btn-text">Create Subscription</span>
+                                    <span class="btn-loading" style="display: none;">Processing...</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://pay.rayswap.exchange/rayswap-sdk.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/subscription.js"></script>
+    <script>
+        // Initialize subscription page
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof SubscriptionManager !== 'undefined') {
+                SubscriptionManager.init();
+            }
+        });
+    </script>
+</body>
+</html>

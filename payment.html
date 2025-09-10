@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - RaySwap Shop</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo">
+                    <h2>RaySwap Shop</h2>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html" class="nav-link">Shop</a>
+                    <a href="subscription.html" class="nav-link">Subscriptions</a>
+                    <a href="cart.html" class="nav-link">Cart <span class="cart-counter" id="cartCounter">0</span></a>
+                    <a href="payment.html" class="nav-link active">Checkout</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <!-- Back Button -->
+            <div style="margin-bottom: 24px;">
+                <a href="cart.html" class="back-link">&larr; Back to Cart</a>
+            </div>
+            
+            <h1>Checkout</h1>
+            <p style="color: #6b7280; margin-bottom: 32px; text-align: center;">Complete your order by providing your information and payment details.</p>
+            
+            <!-- Two Column Layout -->
+            <div class="checkout-container">
+                <!-- Left Column: Customer Information Form -->
+                <div class="checkout-form-section">
+                    <div class="form-card">
+                        <h3>Customer Information</h3>
+                        <form id="customerForm" class="customer-form">
+                            <div class="form-group">
+                                <label for="customerName">Full Name *</label>
+                                <input type="text" id="customerName" name="customerName" required placeholder="Enter your full name">
+                            </div>
+                            <div class="form-group">
+                                <label for="customerEmail">Email Address *</label>
+                                <input type="email" id="customerEmail" name="customerEmail" required placeholder="Enter your email address">
+                            </div>
+                            <div class="form-group">
+                                <label for="customerAddress">Address</label>
+                                <textarea id="customerAddress" name="customerAddress" placeholder="Enter your address (optional)" rows="3"></textarea>
+                            </div>
+                        </form>
+                        
+                        <!-- Payment Method -->
+                        <div class="payment-section">
+                            <h3>Payment Method</h3>
+                            <div class="payment-method selected" data-method="rayswap">
+                                <div class="method-header">
+                                    <div class="method-icon">
+                                        <img src="https://pay.rayswap.exchange/assets/rayswap-logo.svg" alt="RaySwap" style="width: 24px; height: 24px;">
+                                    </div>
+                                    <div class="method-info">
+                                        <span class="method-name">Pay with Crypto</span>
+                                        <span class="method-description">Bitcoin, Ethereum, USDT & more</span>
+                                    </div>
+                                    <div class="method-radio">
+                                        <input type="radio" name="payment-method" value="rayswap" id="rayswap" checked>
+                                        <label for="rayswap"></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="payment-actions">
+                            <button type="button" class="btn btn-secondary" onclick="window.location.href='cart.html'">
+                                Back to Cart
+                            </button>
+                            <button type="button" class="btn btn-primary" id="proceedPaymentBtn">
+                                Pay with Crypto
+                            </button>
+                        </div>
+                        
+                        <!-- Security Notice -->
+                        <div style="text-align: center; margin-top: 24px;">
+                            <p style="font-size: 14px; color: #9ca3af; margin-bottom: 0;">
+                                🔒 Your payment information is secure and encrypted
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column: Order Summary -->
+                <div class="checkout-summary-section">
+                    <div class="summary-card">
+                        <h3>Order Summary</h3>
+                        <div id="orderItems" class="order-items">
+                            <!-- Cart items will be populated here -->
+                        </div>
+                        <div class="summary-divider"></div>
+                        <div class="order-total">
+                            <span>Total:</span>
+                            <span><span class="currency">RWF</span> <span class="total-amount" id="totalAmount">0</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                
+        </div>
+    </div>
+    
+    <script src="https://pay.rayswap.exchange/rayswap-sdk.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/main.js"></script>
+    <script>window.RAYSWAP_INLINE_CHECKOUT = true;</script>
+    <script src="js/payment.js"></script>
+    <script>
+        // Initialize checkout page
+        let cart;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize cart if not already initialized
+            if (typeof cart === 'undefined' || !cart) {
+                cart = new ShoppingCart();
+            }
+            const cartItems = cart.getItems();
+            
+            // Redirect to cart if empty
+            if (cartItems.length === 0) {
+                alert('Your cart is empty. Please add items before checkout.');
+                window.location.href = 'cart.html';
+                return;
+            }
+            
+            // Update cart counter in navigation
+            const cartCounter = document.getElementById('cartCounter');
+            const itemCount = cart.getItemCount();
+            if (itemCount > 0) {
+                cartCounter.textContent = itemCount;
+                cartCounter.style.display = 'inline';
+            }
+            
+            // Populate order summary
+            populateOrderSummary(cartItems);
+            
+            // Form validation
+            const customerForm = document.getElementById('customerForm');
+            const nameInput = document.getElementById('customerName');
+            const emailInput = document.getElementById('customerEmail');
+            const addressInput = document.getElementById('customerAddress');
+            const proceedBtn = document.getElementById('proceedPaymentBtn');
+            
+            // Validate form and enable/disable proceed button
+            function validateForm() {
+                const isFormValid = nameInput.value.trim() && emailInput.value.trim() && emailInput.checkValidity();
+                proceedBtn.disabled = !isFormValid;
+            }
+            
+            // Add event listeners for form validation
+            nameInput.addEventListener('input', validateForm);
+            emailInput.addEventListener('input', validateForm);
+            
+            // Initial validation
+            validateForm();
+            
+            // Handle proceed payment button
+            proceedBtn.addEventListener('click', function() {
+                const customerName = nameInput.value.trim();
+                const customerEmail = emailInput.value.trim();
+                const customerAddress = addressInput.value.trim();
+                
+                if (customerName && customerEmail) {
+                    const customerData = {
+                        name: customerName,
+                        email: customerEmail,
+                        address: customerAddress || 'Not provided'
+                    };
+                    
+                    // Use RaySwap SDK for cryptocurrency payment
+                    processRaySwapPayment(cartItems, customerData);
+                }
+            });
+        });
+        
+        function populateOrderSummary(cartItems) {
+            const orderItemsContainer = document.getElementById('orderItems');
+            const totalAmountElement = document.getElementById('totalAmount');
+            
+            orderItemsContainer.innerHTML = '';
+            let total = 0;
+            
+            cartItems.forEach(item => {
+                const product = ProductManager.getProductById(item.id);
+                if (product) {
+                    const itemTotal = product.price * item.quantity;
+                    total += itemTotal;
+                    
+                    const orderItem = document.createElement('div');
+                    orderItem.className = 'order-item';
+                    orderItem.innerHTML = `
+                        <div class="item-details">
+                            <span class="item-name">${product.name}</span>
+                            <span class="item-description">Quantity: ${item.quantity}</span>
+                        </div>
+                        <div class="item-price">
+                            <span class="currency">RWF</span> <span class="amount">${itemTotal.toLocaleString()}</span>
+                        </div>
+                    `;
+                    orderItemsContainer.appendChild(orderItem);
+                }
+            });
+            
+            totalAmountElement.textContent = total.toLocaleString();
+        }
+        
+        function processRaySwapPayment(cartItems, customerData) {
+            const total = cart.getTotal();
+            
+            // Ensure RaySwap SDK is available
+            if (typeof window.RaySwap !== 'undefined') {
+                // Initialize RaySwap SDK if not already done
+                if (!window.RaySwap._initialized) {
+                    window.RaySwap.init({
+                        apiKey: 'rsk_live_3f8b2a1c9e7d6f4a8b2c5e9f1a3d7b9c',
+                        businessId: 'biz_live_9a8b7c6d5e4f3a2b1c9d8e7f6a5b4c3d',
+                        baseUrl: 'https://pay.rayswap.exchange',
+                        debug: false
+                    });
+                    window.RaySwap._initialized = true;
+                }
+                
+                const paymentData = {
+                    amount: total * 100, // Convert to kobo/cents
+                    currency: 'NGN', // Use NGN as per documentation
+                    description: 'Cart Checkout - ' + cartItems.length + ' items',
+                    customerEmail: customerData.email,
+                    customerName: customerData.name,
+                    redirectUrl: window.location.origin + '/thankyou.html'
+                };
+
+                window.RaySwap.openPayment(
+                    paymentData,
+                    {
+                        onSuccess: function(sessionId) {
+                            // Payment completed (or session created & confirmed)
+                            console.log('Payment successful. Session:', sessionId);
+                            
+                            // Store payment data for thank you page
+                            const paymentDataStore = {
+                                method: 'rayswap',
+                                customer: customerData,
+                                items: cartItems,
+                                total: total,
+                                timestamp: new Date().toISOString(),
+                                transactionId: sessionId || 'TXN-' + Date.now()
+                            };
+                            
+                            localStorage.setItem('paymentData', JSON.stringify(paymentDataStore));
+                            
+                            // Clear cart
+                            cart.clear();
+                            
+                            // Redirect to thank you page
+                            window.location.href = 'thankyou.html';
+                        },
+                        onCancel: function() {
+                            console.log('Payment cancelled by user');
+                            alert('Payment was cancelled. You can try again when ready.');
+                        },
+                        onError: function(error) {
+                            console.error('Payment error:', error);
+                            alert('Payment failed: ' + (error || 'Unknown error'));
+                        }
+                    },
+                    {
+                        theme: 'light' // or 'dark'
+                    }
+                );
+            } else {
+                alert('RaySwap SDK not loaded. Please refresh the page and try again.');
+                console.error('RaySwap SDK not available');
+            }
+        }
+        
+
+    </script>
+</body>
+</html>

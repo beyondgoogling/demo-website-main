@@ -1,0 +1,159 @@
+# RaySwap Payment SDK - Quick Usage Guide
+
+## 1. Installation
+Include the SDK script in your HTML:
+```html
+<script src="https://pay.rayswap.exchange/rayswap-sdk.js"></script>
+```
+
+## 2. Initialize SDK
+```javascript
+RaySwap.init({
+    apiKey: 'your-api-key',        // Required: Your RaySwap API key
+    businessId: 'your-business-id', // Required: Your business ID
+    debug: false                    // Optional: Enable debug logging
+});
+```
+
+## 3. Open Payment Modal
+```javascript
+RaySwap.openPayment(
+    // Payment Data (required)
+    {
+        amount: 100,                           // Required: Payment amount
+        currency: 'USD',                       // Required: Currency code
+        description: 'Product Purchase',       // Optional: Payment description
+        customerEmail: 'user@example.com',     // Optional: Customer email
+        customerName: 'John Doe',              // Optional: Customer name
+        redirectUrl: 'https://yoursite.com/success' // Optional: Success redirect URL
+    },
+    // Callbacks (optional)
+    {
+        onSuccess: function(sessionId) {
+            console.log('Payment completed:', sessionId);
+            // Handle successful payment
+        },
+        onCancel: function() {
+            console.log('Payment cancelled');
+            // Handle payment cancellation
+        },
+        onError: function(error) {
+            console.error('Payment error:', error);
+            // Handle payment errors
+        }
+    },
+    // Options (optional)
+    {
+        theme: 'light' // 'light' or 'dark'
+    }
+);
+```
+
+## 4. Close Payment Modal
+```javascript
+RaySwap.closePayment();
+```
+
+## 5. Clear Idempotency Keys (if needed)
+```javascript
+RaySwap.clearIdempotencyKeys();
+```
+
+## Key Features
+
+### Automatic Environment Detection
+- Single URL works for both sandbox and production
+- Environment automatically detected based on API key
+- No need to specify different URLs
+
+### Built-in Security
+- Automatic idempotency key management
+- Prevents duplicate transactions
+- Secure iframe integration
+
+### Flexible Integration
+- Embedded modal interface
+- Customizable themes (light/dark)
+- Success page redirection support
+- Real-time payment status updates
+
+### Customer Information
+- Optional customer email and name collection
+- Automatic receipt delivery via email
+- Payment confirmation handling
+
+## Example: Complete Integration
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Integration</title>
+</head>
+<body>
+    <button id="pay-button">Pay $100</button>
+    
+    <script src="https://pay.rayswap.exchange/rayswap-sdk.js"></script>
+    <script>
+        // Initialize SDK
+        RaySwap.init({
+            apiKey: 'sk_test_your_api_key',
+            businessId: 'your_business_id'
+        });
+        
+        // Handle payment button click
+        document.getElementById('pay-button').addEventListener('click', function() {
+            RaySwap.openPayment({
+                amount: 100,
+                currency: 'USD',
+                description: 'Product Purchase',
+                customerEmail: 'customer@example.com',
+                redirectUrl: 'https://yoursite.com/success'
+            }, {
+                onSuccess: function(sessionId) {
+                    alert('Payment successful! Session: ' + sessionId);
+                },
+                onCancel: function() {
+                    alert('Payment cancelled');
+                },
+                onError: function(error) {
+                    alert('Payment error: ' + error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+```
+
+## API Reference
+
+### RaySwap.init(config)
+- `apiKey` (string, required): Your RaySwap API key
+- `businessId` (string, required): Your business identifier
+- `debug` (boolean, optional): Enable debug logging
+
+### RaySwap.openPayment(paymentData, callbacks, options)
+- `paymentData.amount` (number, required): Payment amount
+- `paymentData.currency` (string, required): Currency code (USD, EUR, etc.)
+- `paymentData.description` (string, optional): Payment description
+- `paymentData.customerEmail` (string, optional): Customer email
+- `paymentData.customerName` (string, optional): Customer name
+- `paymentData.redirectUrl` (string, optional): Success redirect URL
+- `callbacks.onSuccess` (function, optional): Success callback
+- `callbacks.onCancel` (function, optional): Cancel callback
+- `callbacks.onError` (function, optional): Error callback
+- `options.theme` (string, optional): 'light' or 'dark'
+
+### RaySwap.closePayment()
+Closes the current payment modal
+
+### RaySwap.clearIdempotencyKeys()
+Clears all stored idempotency keys
+
+## Notes
+- All payments are processed securely through RaySwap's infrastructure
+- Customers receive email receipts automatically
+- The SDK handles all crypto payment complexities
+- Support for multiple cryptocurrencies and networks
+- Real-time exchange rate calculations
+- Mobile-responsive payment interface

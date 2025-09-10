@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Successful - RaySwap Shop</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav">
+                <div class="logo">
+                    <h2>RaySwap Shop</h2>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html" class="nav-link">Shop</a>
+                    <a href="subscription.html" class="nav-link">Subscriptions</a>
+                    <a href="cart.html" class="nav-link cart-link">
+                        Cart <span class="cart-counter">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="success-container">
+                <!-- Success Icon -->
+                <div class="success-icon">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" fill="#10B981"/>
+                        <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <!-- Success Message -->
+                <div class="success-content">
+                    <h1>Subscription Created Successfully!</h1>
+                    <p class="success-description">
+                        Your subscription has been set up and is now active. You will receive a confirmation email shortly with all the details.
+                    </p>
+
+                    <!-- Subscription Details -->
+                    <div class="subscription-details" id="subscriptionDetails">
+                        <h3>Subscription Details</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Session ID:</span>
+                                <span class="detail-value" id="sessionId">Loading...</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Status:</span>
+                                <span class="detail-value status-active">Active</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Created:</span>
+                                <span class="detail-value" id="createdDate">Just now</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Next Steps -->
+                    <div class="next-steps">
+                        <h3>What's Next?</h3>
+                        <ul class="steps-list">
+                            <li>
+                                <div class="step-icon">📧</div>
+                                <div class="step-content">
+                                    <strong>Check Your Email</strong>
+                                    <p>We've sent a confirmation email with your subscription details and receipt.</p>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="step-icon">💳</div>
+                                <div class="step-content">
+                                    <strong>Automatic Billing</strong>
+                                    <p>Your subscription will be automatically charged according to your selected billing cycle.</p>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="step-icon">🔧</div>
+                                <div class="step-content">
+                                    <strong>Manage Subscription</strong>
+                                    <p>You can view and manage your subscription anytime through your account dashboard.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <a href="subscription.html" class="btn btn-secondary">View All Plans</a>
+                        <a href="index.html" class="btn btn-primary">Continue Shopping</a>
+                    </div>
+
+                    <!-- Support Information -->
+                    <div class="support-info">
+                        <h4>Need Help?</h4>
+                        <p>
+                            If you have any questions about your subscription or need assistance, 
+                            please contact our support team at 
+                            <a href="mailto:support@rayswap.exchange">support@rayswap.exchange</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    <script>
+        // Extract session ID from URL parameters
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session');
+            
+            if (sessionId) {
+                document.getElementById('sessionId').textContent = sessionId;
+            } else {
+                document.getElementById('sessionId').textContent = 'N/A';
+            }
+
+            // Set current date
+            const now = new Date();
+            document.getElementById('createdDate').textContent = now.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+
+            // Track success event
+            if (typeof Analytics !== 'undefined') {
+                Analytics.trackEvent('subscription_success', 'subscription', sessionId || 'unknown');
+            }
+        });
+    </script>
+</body>
+</html>

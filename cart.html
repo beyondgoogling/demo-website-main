@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - RaySwap Shop</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav">
+                <div class="logo">
+                    <h2>RaySwap Shop</h2>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html" class="nav-link">Shop</a>
+                    <a href="subscription.html" class="nav-link">Subscriptions</a>
+                    <a href="cart.html" class="nav-link cart-link active">
+                        Cart <span class="cart-counter">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="cart-container">
+                <!-- Cart Header -->
+                <div class="cart-header">
+                    <h1>Shopping Cart</h1>
+                    <p class="cart-subtitle">Review your items before checkout</p>
+                </div>
+
+                <!-- Cart Content -->
+                <div class="cart-content">
+                    <!-- Empty Cart State -->
+                    <div class="empty-cart" id="emptyCart" style="display: none;">
+                        <div class="empty-cart-icon">🛒</div>
+                        <h3>Your cart is empty</h3>
+                        <p>Add some products to get started!</p>
+                        <a href="index.html" class="btn btn-primary">Continue Shopping</a>
+                    </div>
+
+                    <!-- Cart Items -->
+                    <div class="cart-items-section" id="cartItemsSection">
+                        <div class="cart-items" id="cartItems">
+                            <!-- Cart items will be loaded here -->
+                        </div>
+
+                        <!-- Cart Summary -->
+                        <div class="cart-summary">
+                            <div class="summary-card">
+                                <h3>Order Summary</h3>
+                                <div class="summary-row">
+                                    <span>Items (<span id="itemCount">0</span>)</span>
+                                    <span id="subtotal">RWF 0</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Shipping</span>
+                                    <span class="free-shipping">Free</span>
+                                </div>
+                                <div class="summary-divider"></div>
+                                <div class="summary-row total-row">
+                                    <span>Total</span>
+                                    <span id="totalAmount">RWF 0</span>
+                                </div>
+                                <button class="btn btn-primary checkout-btn" id="checkoutBtn" onclick="proceedToCheckout()">
+                                    Proceed to Checkout
+                                </button>
+                                <a href="index.html" class="continue-shopping">Continue Shopping</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://pay.rayswap.exchange/rayswap-sdk.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Initialize cart page
+        let cart;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize cart if not already initialized
+            if (typeof cart === 'undefined' || !cart) {
+                cart = new ShoppingCart();
+            }
+            loadCartItems();
+            updateCartSummary();
+            updateCartCounter();
+        });
+
+        // Listen for cart changes
+        cart.addListener(() => {
+            loadCartItems();
+            updateCartSummary();
+            updateCartCounter();
+        });
+
+        // Load and display cart items
+        function loadCartItems() {
+            const cartItems = cart.getItems();
+            const cartItemsContainer = document.getElementById('cartItems');
+            const emptyCart = document.getElementById('emptyCart');
+            const cartItemsSection = document.getElementById('cartItemsSection');
+
+            if (cartItems.length === 0) {
+                emptyCart.style.display = 'block';
+                cartItemsSection.style.display = 'none';
+            } else {
+                emptyCart.style.display = 'none';
+                cartItemsSection.style.display = 'block';
+                
+                cartItemsContainer.innerHTML = cartItems.map(item => CartUI.generateCartItemHTML(item)).join('');
+            }
+        }
+
+        // Update cart summary
+        function updateCartSummary() {
+            const summary = cart.getCheckoutSummary();
+            
+            document.getElementById('itemCount').textContent = summary.itemCount;
+            document.getElementById('subtotal').textContent = CartUI.formatPrice(summary.total, summary.currency);
+            document.getElementById('totalAmount').textContent = CartUI.formatPrice(summary.total, summary.currency);
+            
+            // Enable/disable checkout button
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            if (summary.itemCount === 0) {
+                checkoutBtn.disabled = true;
+                checkoutBtn.textContent = 'Cart is Empty';
+            } else {
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = 'Proceed to Checkout';
+            }
+        }
+
+        // Proceed to checkout
+        function proceedToCheckout() {
+            const validation = cart.validateCart();
+            
+            if (!validation.valid) {
+                alert(validation.message);
+                return;
+            }
+
+            // Store cart data for checkout
+            const checkoutData = cart.getCheckoutSummary();
+            localStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+            
+            // Redirect to payment page
+            window.location.href = 'payment.html';
+        }
+
+        // Clear cart function (for testing)
+        function clearCart() {
+            if (confirm('Are you sure you want to clear your cart?')) {
+                cart.clear();
+            }
+        }
+        
+        // Update cart counter in navigation
+        function updateCartCounter() {
+            const cartCounter = document.querySelector('.cart-counter');
+            const itemCount = cart.getItemCount();
+            cartCounter.textContent = itemCount;
+            cartCounter.style.display = itemCount > 0 ? 'inline' : 'none';
+        }
+    </script>
+</body>
+</html>

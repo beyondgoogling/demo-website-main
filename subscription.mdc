@@ -1,0 +1,368 @@
+# Create subscription checkout session
+
+## OpenAPI Specification
+
+```yaml
+openapi: 3.0.1
+info:
+  title: ''
+  description: ''
+  version: 1.0.0
+paths:
+  /api/v1/subscriptions/checkout-sessions:
+    post:
+      summary: Create subscription checkout session
+      deprecated: false
+      description: ''
+      tags:
+        - Subscriptions
+        - Subscriptions
+      parameters:
+        - name: x-business-id
+          in: header
+          description: Business ID associated with your API key (required)
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          description: >
+            Optional idempotency key for safely retrying mutation requests
+            (POST/PATCH/DELETE).
+
+            When provided, duplicate requests with the same body within 60
+            minutes return the original response; reusing the same key with
+            different request data returns 400.
+
+            Scope: per business and endpoint.
+          required: false
+          example: ''
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 255
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionCheckoutSessionRequest'
+      responses:
+        '201':
+          description: Checkout session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateSubscriptionCheckoutSessionResponse'
+              example:
+                checkoutSession:
+                  uid: cs_1234567890abcdef
+                  approval_url: >-
+                    https://checkout.rayswap.exchange/approve/cs_1234567890abcdef
+                subscription:
+                  uid: sub_abcdef1234567890
+                customer:
+                  uid: cus_fedcba0987654321
+          headers: {}
+          x-apidog-name: Created
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema: &ref_0
+                $ref: '#/components/schemas/ErrorResponse'
+          headers: {}
+          x-apidog-name: Bad Request
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema: *ref_0
+          headers: {}
+          x-apidog-name: Unauthorized
+      security:
+        - ApiKeyAuth: []
+          x-apidog:
+            schemeGroups:
+              - id: tnwE0uuDVISpfOmlyZjqu
+                schemeIds:
+                  - ApiKeyAuth
+            required: true
+            use:
+              id: tnwE0uuDVISpfOmlyZjqu
+            scopes:
+              tnwE0uuDVISpfOmlyZjqu:
+                ApiKeyAuth: []
+      x-apidog-folder: Subscriptions
+      x-apidog-status: released
+      x-run-in-apidog: https://app.apidog.com/web/project/1057672/apis/api-21224697-run
+components:
+  schemas:
+    CreateSubscriptionCheckoutSessionRequest:
+      type: object
+      required:
+        - priceUid
+        - customer
+        - successUrl
+        - cancelUrl
+      properties:
+        priceUid:
+          type: string
+        customer:
+          type: object
+          required:
+            - email
+          properties:
+            email:
+              type: string
+              format: email
+            firstName:
+              type: string
+            lastName:
+              type: string
+          x-apidog-orders:
+            - email
+            - firstName
+            - lastName
+          x-apidog-ignore-properties: []
+        successUrl:
+          type: string
+          format: uri
+        cancelUrl:
+          type: string
+          format: uri
+      x-apidog-orders:
+        - priceUid
+        - customer
+        - successUrl
+        - cancelUrl
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    CreateSubscriptionCheckoutSessionResponse:
+      type: object
+      properties:
+        checkoutSession:
+          type: object
+          properties:
+            uid:
+              type: string
+            approval_url:
+              type: string
+          x-apidog-orders:
+            - uid
+            - approval_url
+          x-apidog-ignore-properties: []
+        subscription:
+          type: object
+          properties:
+            uid:
+              type: string
+          x-apidog-orders:
+            - uid
+          x-apidog-ignore-properties: []
+        customer:
+          type: object
+          properties:
+            uid:
+              type: string
+          x-apidog-orders:
+            - uid
+          x-apidog-ignore-properties: []
+      x-apidog-orders:
+        - checkoutSession
+        - subscription
+        - customer
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      x-apidog-orders:
+        - error
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+  securitySchemes:
+    ApiKeyAuth:
+      type: apikey
+      in: header
+      name: x-api-key
+      description: Rayswap API key
+    BearerJWT:
+      type: jwt
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT auth for SSE
+servers: []
+security: []
+
+```
+
+# List subscription plans
+
+## OpenAPI Specification
+
+```yaml
+openapi: 3.0.1
+info:
+  title: ''
+  description: ''
+  version: 1.0.0
+paths:
+  /api/v1/subscriptions/plans:
+    get:
+      summary: List subscription plans
+      deprecated: false
+      description: ''
+      tags:
+        - Subscriptions
+        - Subscriptions
+      parameters:
+        - name: limit
+          in: query
+          description: ''
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: ''
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: status
+          in: query
+          description: ''
+          required: false
+          schema:
+            type: string
+            enum:
+              - ACTIVE
+              - INACTIVE
+        - name: x-business-id
+          in: header
+          description: Business ID associated with your API key (required)
+          required: true
+          example: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of subscription plans
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlansListResponse'
+          headers: {}
+          x-apidog-name: OK
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers: {}
+          x-apidog-name: Unauthorized
+      security:
+        - ApiKeyAuth: []
+          x-apidog:
+            schemeGroups:
+              - id: e1R_6UhPKcK6s5synAOBs
+                schemeIds:
+                  - ApiKeyAuth
+            required: true
+            use:
+              id: e1R_6UhPKcK6s5synAOBs
+            scopes:
+              e1R_6UhPKcK6s5synAOBs:
+                ApiKeyAuth: []
+      x-apidog-folder: Subscriptions
+      x-apidog-status: released
+      x-run-in-apidog: https://app.apidog.com/web/project/1057672/apis/api-21224708-run
+components:
+  schemas:
+    PlansListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionPlan'
+      x-apidog-orders:
+        - success
+        - data
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    SubscriptionPlan:
+      type: object
+      properties:
+        uid:
+          type: string
+        business_id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        metadata:
+          type: object
+          x-apidog-orders: []
+          properties: {}
+          x-apidog-ignore-properties: []
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        prices:
+          type: array
+          items:
+            type: string
+      x-apidog-orders:
+        - uid
+        - business_id
+        - name
+        - description
+        - metadata
+        - status
+        - created_at
+        - updated_at
+        - prices
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      x-apidog-orders:
+        - error
+      x-apidog-ignore-properties: []
+      x-apidog-folder: ''
+  securitySchemes:
+    ApiKeyAuth:
+      type: apikey
+      in: header
+      name: x-api-key
+      description: Rayswap API key
+    BearerJWT:
+      type: jwt
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT auth for SSE
+servers: []
+security: []
+
+```
+

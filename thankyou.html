@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - Payment Gateway Demo</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <!-- Navigation Header -->
+            <header class="header">
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">Shop</a>
+                    <a href="subscription.html" class="nav-link">Subscriptions</a>
+                    <a href="cart.html" class="nav-link">Cart <span id="cartCounter" class="cart-counter" style="display: none;">0</span></a>
+                    <a href="payment.html" class="nav-link">Checkout</a>
+                </nav>
+            </header>
+            
+            <div class="card success-card">
+                <!-- Success Icon -->
+                <div class="success-icon">
+                    ✅
+                </div>
+                
+                <!-- Success Message -->
+                <h1>Payment Successful!</h1>
+                <p style="color: #6b7280; margin-bottom: 32px; text-align: center;">
+                    Thank you <span id="customerName">for your purchase</span>. Your transaction has been completed successfully.
+                </p>
+                
+                <!-- Customer Information -->
+                <div class="transaction-details">
+                    <h3>Customer Information</h3>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Name:</span>
+                        <span class="detail-value" id="customerFullName">-</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Email:</span>
+                        <span class="detail-value" id="customerEmail">-</span>
+                    </div>
+                </div>
+                
+                <!-- Transaction Details -->
+                <div class="transaction-details">
+                    <h3>Transaction Details</h3>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Transaction ID:</span>
+                        <span class="detail-value" id="transactionId">TXN-1234567890</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Date & Time:</span>
+                        <span class="detail-value" id="transactionDate">January 20, 2025 at 2:30 PM</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Payment Method:</span>
+                        <span class="detail-value" id="paymentMethod">Mobile Money</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Total Amount:</span>
+                        <span class="detail-value" id="totalAmount"><span class="currency">RWF</span> 4,000</span>
+                    </div>
+                </div>
+                
+                <!-- Order Summary -->
+                <div class="order-summary">
+                    <h3>Order Summary</h3>
+                    <div id="orderItems">
+                        <!-- Order items will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Next Steps -->
+                <div class="next-steps">
+                    <h3>What's Next?</h3>
+                    <ul style="color: #6b7280; margin-bottom: 24px; padding-left: 20px; text-align: left;">
+                        <li>You will receive a confirmation email shortly</li>
+                        <li>Your software license will be activated within 24 hours</li>
+                        <li>Access instructions will be sent to your email</li>
+                        <li>Contact support if you have any questions</li>
+                    </ul>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="success-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.print()">
+                        Print Receipt
+                    </button>
+                    <a href="index.html" class="btn btn-primary">
+                        Continue Shopping
+                    </a>
+                </div>
+                
+                <!-- Support Info -->
+                <div style="text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+                    <p style="font-size: 14px; color: #9ca3af; margin-bottom: 8px;">
+                        Need help? Contact our support team
+                    </p>
+                    <p style="font-size: 14px; color: #4f46e5; margin-bottom: 0;">
+                        📧 support@example.com | 📞 +250 123 456 789
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://pay.rayswap.exchange/rayswap-sdk.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Initialize thank you page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load payment data from localStorage
+            const paymentData = JSON.parse(localStorage.getItem('paymentData') || '{}');
+            
+            if (paymentData.transactionId) {
+                // Update customer information
+                if (paymentData.customer) {
+                    document.getElementById('customerName').textContent = paymentData.customer.name;
+                    document.getElementById('customerFullName').textContent = paymentData.customer.name;
+                    document.getElementById('customerEmail').textContent = paymentData.customer.email;
+                }
+                
+                // Update transaction details with actual data
+                document.getElementById('transactionId').textContent = paymentData.transactionId;
+                
+                // Format and display transaction date
+                const date = new Date(paymentData.timestamp);
+                const formattedDate = date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }) + ' at ' + date.toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                document.getElementById('transactionDate').textContent = formattedDate;
+                
+                // Update payment method
+                const methodNames = {
+                    'mobile-money': 'Mobile Money',
+                    'bank-transfer': 'Bank Transfer',
+                    'card': 'Credit/Debit Card',
+                    'rayswap': 'RaySwap Cryptocurrency'
+                };
+                document.getElementById('paymentMethod').textContent = methodNames[paymentData.method] || paymentData.method;
+                
+                // Update total amount
+                if (paymentData.total) {
+                    document.getElementById('totalAmount').innerHTML = `<span class="currency">RWF</span> ${paymentData.total.toLocaleString()}`;
+                }
+                
+                // Populate order items
+                populateOrderItems(paymentData.items || []);
+            }
+            
+            // Update cart counter (should be 0 after successful payment)
+            const cartCounter = document.getElementById('cartCounter');
+            cartCounter.style.display = 'none';
+            
+            // Add some celebration animation
+            const successIcon = document.querySelector('.success-icon');
+            setTimeout(() => {
+                successIcon.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    successIcon.style.transform = 'scale(1)';
+                }, 200);
+            }, 500);
+        });
+        
+        function populateOrderItems(items) {
+            const orderItemsContainer = document.getElementById('orderItems');
+            orderItemsContainer.innerHTML = '';
+            
+            if (items.length === 0) {
+                orderItemsContainer.innerHTML = '<p style="color: #6b7280; text-align: center;">No items found</p>';
+                return;
+            }
+            
+            items.forEach(item => {
+                const product = getProductById(item.id);
+                if (product) {
+                    const itemTotal = product.price * item.quantity;
+                    
+                    const orderItem = document.createElement('div');
+                    orderItem.className = 'order-item';
+                    orderItem.innerHTML = `
+                        <div class="item-details">
+                            <span class="item-name">${product.name}</span>
+                            <span class="item-description">Quantity: ${item.quantity} × RWF ${product.price.toLocaleString()}</span>
+                        </div>
+                        <div class="item-price">
+                            <span class="currency">RWF</span> <span class="amount">${itemTotal.toLocaleString()}</span>
+                        </div>
+                    `;
+                    orderItemsContainer.appendChild(orderItem);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

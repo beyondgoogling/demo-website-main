@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RaySwap SDK Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            background: #f3f4f6;
+            border-left: 4px solid #6b7280;
+        }
+        .success {
+            background: #ecfdf5;
+            border-left-color: #10b981;
+            color: #065f46;
+        }
+        .error {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RaySwap SDK Integration Test</h1>
+        <p>This page tests the RaySwap SDK integration implemented in payment.js</p>
+        
+        <div id="status" class="status">
+            <strong>Status:</strong> <span id="statusText">Initializing...</span>
+        </div>
+        
+        <div>
+            <button class="btn" onclick="testSDKLoad()">Test SDK Loading</button>
+            <button class="btn" onclick="testPayment()">Test Payment Modal</button>
+            <button class="btn" onclick="checkSDKStatus()">Check SDK Status</button>
+        </div>
+        
+        <div id="logs" style="margin-top: 20px; font-family: monospace; font-size: 14px; background: #1f2937; color: #f9fafb; padding: 15px; border-radius: 6px; max-height: 300px; overflow-y: auto;">
+            <div><strong>Console Logs:</strong></div>
+        </div>
+    </div>
+
+    <script src="js/payment.js"></script>
+    <script>
+        // Override console.log to display in our logs div
+        const originalLog = console.log;
+        const originalError = console.error;
+        const logsDiv = document.getElementById('logs');
+        
+        function addLog(message, type = 'log') {
+            const logEntry = document.createElement('div');
+            logEntry.style.color = type === 'error' ? '#ef4444' : '#10b981';
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logsDiv.appendChild(logEntry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addLog(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addLog(args.join(' '), 'error');
+        };
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const statusText = document.getElementById('statusText');
+            statusText.textContent = message;
+            
+            statusDiv.className = 'status';
+            if (type === 'success') statusDiv.className += ' success';
+            if (type === 'error') statusDiv.className += ' error';
+        }
+        
+        function testSDKLoad() {
+            updateStatus('Testing SDK loading...');
+            addLog('Starting SDK load test');
+            
+            PaymentGatewaySDK.loadSDKScript()
+                .then(() => {
+                    updateStatus('SDK loaded successfully!', 'success');
+                    addLog('SDK load test completed successfully');
+                })
+                .catch(error => {
+                    updateStatus('SDK loading failed: ' + error.message, 'error');
+                    addLog('SDK load test failed: ' + error.message);
+                });
+        }
+        
+        function testPayment() {
+            updateStatus('Testing payment modal...');
+            addLog('Starting payment test');
+            
+            // Check if RaySwap SDK is available
+            if (typeof window.RaySwap === 'undefined') {
+                addLog('❌ RaySwap SDK not loaded');
+                updateStatus('RaySwap SDK not available', 'error');
+                return;
+            }
+            
+            // Use RaySwap SDK directly as shown in documentation
+            window.RaySwap.openPayment(
+                {
+                    amount: 500000,           // target (fiat) amount to collect
+                    currency: 'NGN',          // target currency to settle in
+                    description: 'Pro Plan',  // optional
+                    customerEmail: 'customer@example.com', // optional
+                    customerName: 'John Doe',              // optional
+                    redirectUrl: 'https://yourapp.com/thank-you' // optional
+                },
+                {
+                    onSuccess: function (sessionId) {
+                        // Payment completed (or session created & confirmed)
+                        addLog('✅ Payment successful. Session: ' + sessionId);
+                        updateStatus('Payment completed successfully', 'success');
+                        console.log('Payment successful. Session:', sessionId);
+                        // Optionally redirect or update UI here
+                    },
+                    onCancel: function () {
+                        addLog('❌ Payment cancelled by user');
+                        updateStatus('Payment cancelled');
+                        console.log('Payment cancelled by user');
+                    },
+                    onError: function (error) {
+                        addLog('❌ Payment error: ' + error);
+                        updateStatus('Payment failed: ' + error, 'error');
+                        console.error('Payment error:', error);
+                    }
+                },
+                {
+                    theme: 'light' // or 'dark'
+                }
+            );
+        }
+        
+        function checkSDKStatus() {
+            addLog('Checking SDK status...');
+            
+            if (typeof window.RaySwap !== 'undefined') {
+                addLog('✅ RaySwap SDK is loaded and available');
+                
+                // Check if RaySwap is properly initialized
+                try {
+                    // Try to access RaySwap methods
+                    if (typeof window.RaySwap.init === 'function' && typeof window.RaySwap.openPayment === 'function') {
+                        addLog('✅ RaySwap SDK methods are available');
+                        updateStatus('RaySwap SDK fully loaded and ready', 'success');
+                    } else {
+                        addLog('⚠️ RaySwap SDK loaded but methods not available');
+                        updateStatus('RaySwap SDK partially loaded');
+                    }
+                } catch (error) {
+                    addLog('❌ Error checking RaySwap SDK: ' + error.message);
+                    updateStatus('RaySwap SDK error: ' + error.message, 'error');
+                }
+            } else {
+                addLog('❌ RaySwap SDK is not loaded');
+                updateStatus('RaySwap SDK not available', 'error');
+            }
+            
+            // Check PaymentGatewaySDK status
+            if (typeof PaymentGatewaySDK !== 'undefined') {
+                addLog('✅ PaymentGatewaySDK is available');
+            } else {
+                addLog('❌ PaymentGatewaySDK is not available');
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('Page loaded, initializing Payment Gateway SDK');
+            updateStatus('Initializing Payment Gateway SDK...');
+            
+            try {
+                PaymentGatewaySDK.init();
+                updateStatus('Payment Gateway SDK initialized', 'success');
+                addLog('Payment Gateway SDK initialization completed');
+            } catch (error) {
+                updateStatus('Initialization failed: ' + error.message, 'error');
+                addLog('Initialization error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+# SDK Integration Guide
+
+# Rayswap Web SDK Integration Guide
+
+This guide shows how to embed Rayswap’s checkout modal on your website using the Web SDK. It lets your customers pay in crypto while you receive fiat payouts.
+
+## Overview
+- One line to include the SDK script
+- Initialize once with your publishable API key and business ID
+- Call `RaySwap.openPayment(...)` to launch the modal
+- Handle `onSuccess`, `onCancel`, and `onError` callbacks
+- Built-in idempotency for safe retries
+
+## 1) Include the SDK Script
+```html
+<script src="https://pay.rayswap.exchange/rayswap-sdk.js"></script>
+```
+
+## 2) Initialize the SDK
+Call `RaySwap.init` as early as possible (e.g., on page load):
+```html
+<script>
+  window.RaySwap.init({
+    apiKey: 'YOUR_PUBLISHABLE_API_KEY',    // from Rayswap dashboard
+    businessId: 'YOUR_BUSINESS_ID',        // your Rayswap business ID
+    debug: false                           // optional: set true to log SDK events
+  });
+</script>
+```
+Notes:
+- Use a publishable API key intended for client-side usage.
+- The SDK determines the payment server URL automatically. Ensure you load the correct script URL for your environment.
+
+## 3) Open the Payment Modal
+Trigger the modal when the customer clicks a button or when your flow requires payment.
+```html
+<script>
+  function startCheckout() {
+    RaySwap.openPayment(
+      {
+        amount: 500000,           // target (fiat) amount to collect
+        currency: 'NGN',          // target currency to settle in
+        description: 'Pro Plan',  // optional
+        customerEmail: 'customer@example.com', // optional
+        customerName: 'John Doe',              // optional
+        redirectUrl: 'https://yourapp.com/thank-you' // optional
+      },
+      {
+        onSuccess: function (sessionId) {
+          // Payment completed (or session created & confirmed)
+          console.log('Payment successful. Session:', sessionId);
+          // Optionally redirect or update UI here
+        },
+        onCancel: function () {
+          console.log('Payment cancelled by user');
+        },
+        onError: function (error) {
+          console.error('Payment error:', error);
+        }
+      },
+      {
+        theme: 'light' // or 'dark'
+      }
+    );
+  }
+</script>
+```
+Attach `startCheckout()` to your checkout button:
+```html
+<button onclick="startCheckout()">Pay with Crypto</button>
+```
+
+## 4) How It Works Under the Hood
+- The SDK creates a Checkout Session by calling your Rayswap payment server (`/api/checkout/create-session`).
+- It sets and manages an idempotency key so repeated clicks or retries won’t create duplicate sessions.
+- It embeds the secure checkout in a modal (iframe) and communicates using `postMessage` for success/cancel events.
+
+## 5) Options and Callbacks
+- `options.theme`: `'light' | 'dark'` (default `'light'`).
+- `callbacks.onSuccess(sessionId)`: invoked when the payment session completes successfully.
+- `callbacks.onCancel()`: invoked when the user closes/cancels the modal.
+- `callbacks.onError(error)`: invoked on network/validation failures.
+
+## 6) Security Notes
+- Use only your publishable (client) API key on the frontend.
+- Keep secret keys on your server. Never embed secret keys in client code.
+
+## 7) Troubleshooting
+- If the modal doesn’t open, ensure `RaySwap.init` ran without errors (check console if `debug: true`).
+- Verify your amount and currency are valid and within min/max limits configured on your Rayswap account.
+- For local testing, ensure the payment server is reachable from the browser (CORS, correct host/port).
+
+## 8) Example
+See a working example in this repo at `public/embed-example.html` and the SDK source at `public/rayswap-sdk.js`.

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RaySwap Shop - Digital Products &amp; Services</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav">
+                <div class="logo">
+                    <h2>RaySwap Shop</h2>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html" class="nav-link active">Shop</a>
+                    <a href="subscription.html" class="nav-link">Subscriptions</a>
+                    <a href="cart.html" class="nav-link cart-link">
+                        Cart <span class="cart-counter">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Hero Section -->
+            <section class="hero">
+                <h1>Digital Products &amp; Services</h1>
+                <p>Discover our collection of premium software, tools, and services designed to boost your productivity and grow your business.</p>
+            </section>
+
+            <!-- Product Grid -->
+            <section class="products-section">
+                <div class="products-grid" id="productsGrid">
+                    <!-- Products will be loaded here by JavaScript -->
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <script src="https://pay.rayswap.exchange/rayswap-sdk.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Initialize shop page
+        let cart;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize cart if not already initialized
+            if (typeof cart === 'undefined' || !cart) {
+                cart = new ShoppingCart();
+            }
+            loadProducts();
+            updateCartCounter();
+        });
+
+        // Load and display products
+        function loadProducts() {
+            const productsGrid = document.getElementById('productsGrid');
+            const allProducts = ProductManager.getAllProducts();
+            
+            productsGrid.innerHTML = allProducts.map(product => `
+                <div class="product-card" data-product-id="${product.id}">
+                    <div class="product-image">
+                        ${product.name.split(' ').map(word => word.charAt(0)).join('').substring(0, 3)}
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-category">${product.category}</p>
+                        <p class="product-description">${product.description}</p>
+                        <div class="product-features">
+                            <ul>
+                                ${product.features.slice(0, 2).map(feature => `<li>${feature}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="product-price">
+                            <span class="currency">${product.currency}</span> ${product.price.toLocaleString()}
+                        </div>
+                        <button class="btn btn-primary add-to-cart-btn" onclick="addToCart('${product.id}')">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add product to cart
+        function addToCart(productId) {
+            const product = ProductManager.getProductById(productId);
+            if (product) {
+                cart.addItem(product);
+                CartUI.showAddToCartMessage(product.name);
+                updateCartCounter();
+            }
+        }
+        
+        // Update cart counter in navigation
+        function updateCartCounter() {
+            const cartCounter = document.querySelector('.cart-counter');
+            const itemCount = cart.getItemCount();
+            cartCounter.textContent = itemCount;
+            cartCounter.style.display = itemCount > 0 ? 'inline' : 'none';
+        }
+    </script>
+</body>
+</html>
