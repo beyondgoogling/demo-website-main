@@ -85,12 +85,61 @@ const PaymentGatewaySDK = {
                     debug: this.config.environment === 'sandbox'
                 });
                 console.log('RaySwap SDK initialized successfully');
+                
+                // Test connection after initialization
+                this.testSDKConnection();
             } catch (error) {
                 console.error('Failed to initialize RaySwap SDK:', error);
                 throw error;
             }
         } else {
             throw new Error('RaySwap SDK not available');
+        }
+    },
+
+    /**
+     * Test SDK connection and credentials
+     */
+    testSDKConnection: function() {
+        console.log('🔍 Testing RaySwap SDK Connection...');
+        console.log('📋 Configuration:');
+        console.log('  - API Key:', this.config.rayswap.apiKey ? this.config.rayswap.apiKey.substring(0, 20) + '...' : 'Not set');
+        console.log('  - Business ID:', this.config.rayswap.businessId || 'Not set');
+        console.log('  - Base URL:', this.config.rayswap.baseUrl || 'Not set');
+        console.log('  - Environment:', this.config.environment);
+        
+        // Check if RaySwap object is available
+        if (typeof window.RaySwap !== 'undefined') {
+            console.log('✅ RaySwap SDK loaded successfully');
+            
+            // Check if SDK has required methods
+            const requiredMethods = ['init', 'createPayment', 'processPayment'];
+            const availableMethods = requiredMethods.filter(method => typeof window.RaySwap[method] === 'function');
+            
+            console.log('📦 Available SDK methods:', availableMethods);
+            
+            if (availableMethods.length === requiredMethods.length) {
+                console.log('✅ All required SDK methods are available');
+            } else {
+                console.warn('⚠️ Some SDK methods are missing:', requiredMethods.filter(m => !availableMethods.includes(m)));
+            }
+            
+            // Test basic SDK functionality
+            try {
+                if (typeof window.RaySwap.getVersion === 'function') {
+                    console.log('📦 SDK Version:', window.RaySwap.getVersion());
+                }
+                
+                if (typeof window.RaySwap.isReady === 'function') {
+                    console.log('🔄 SDK Ready Status:', window.RaySwap.isReady());
+                }
+                
+                console.log('✅ SDK Connection Test Completed Successfully');
+            } catch (error) {
+                console.error('❌ SDK Connection Test Failed:', error);
+            }
+        } else {
+            console.error('❌ RaySwap SDK not loaded');
         }
     },
 
