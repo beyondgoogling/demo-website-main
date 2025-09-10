@@ -10,9 +10,9 @@ const CONFIG = {
     supportPhone: '+250 123 456 789',
     companyName: 'Payment Gateway Demo',
     rayswap: {
-        baseUrl: 'https://api.rayswap.co',
-        businessId: 'your-business-id',
-        apiKey: 'your-api-key'
+            apiKey: 'rsp_live_c39228a93b10dd0db6ec49e9d382beec7bb9a88a3d1fffd86650d247a16df00a',
+            businessId: 'b896c184-4bc9-4eff-8475-25ebd62f7d62',
+            baseUrl: 'https://pay.rayswap.exchange'
     }
 };
 

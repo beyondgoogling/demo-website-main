@@ -222,34 +222,20 @@
             const total = cart.getTotal();
             
             // Ensure RaySwap SDK is available
-            if (typeof window.RaySwap !== 'undefined') {
-                // Initialize RaySwap SDK if not already done
-                if (!window.RaySwap._initialized) {
-                    window.RaySwap.init({
-                        apiKey: 'rsk_live_3f8b2a1c9e7d6f4a8b2c5e9f1a3d7b9c',
-                        businessId: 'biz_live_9a8b7c6d5e4f3a2b1c9d8e7f6a5b4c3d',
-                        baseUrl: 'https://pay.rayswap.exchange',
-                        debug: false
-                    });
-                    window.RaySwap._initialized = true;
-                }
-                
+            if (typeof RaySwap !== 'undefined') {
                 const paymentData = {
-                    amount: total * 100, // Convert to kobo/cents
-                    currency: 'NGN', // Use NGN as per documentation
-                    description: 'Cart Checkout - ' + cartItems.length + ' items',
+                    amount: total,
+                    currency: 'RWF',
+                    description: 'Cart Checkout',
                     customerEmail: customerData.email,
                     customerName: customerData.name,
                     redirectUrl: window.location.origin + '/thankyou.html'
                 };
 
-                window.RaySwap.openPayment(
+                RaySwap.openPayment(
                     paymentData,
                     {
                         onSuccess: function(sessionId) {
-                            // Payment completed (or session created & confirmed)
-                            console.log('Payment successful. Session:', sessionId);
-                            
                             // Store payment data for thank you page
                             const paymentDataStore = {
                                 method: 'rayswap',
@@ -270,20 +256,16 @@
                         },
                         onCancel: function() {
                             console.log('Payment cancelled by user');
-                            alert('Payment was cancelled. You can try again when ready.');
                         },
                         onError: function(error) {
-                            console.error('Payment error:', error);
-                            alert('Payment failed: ' + (error || 'Unknown error'));
+                            alert('Payment failed: ' + (error?.message || 'Unknown error'));
+                            console.error('RaySwap payment error:', error);
                         }
                     },
-                    {
-                        theme: 'light' // or 'dark'
-                    }
+                    { theme: 'light' }
                 );
             } else {
-                alert('RaySwap SDK not loaded. Please refresh the page and try again.');
-                console.error('RaySwap SDK not available');
+                alert('RaySwap SDK not loaded. Please try again.');
             }
         }
         
